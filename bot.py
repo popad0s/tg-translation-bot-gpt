@@ -81,12 +81,29 @@ def handle_document(update: Update, context: CallbackContext) -> None:
         pdf_data = io.BytesIO()
         file.download(out=pdf_data)
         images = convert_from_bytes(pdf_data.getvalue())
+
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=landscape(letter))
+        c.setFont("Helvetica", 12)
+
         for idx, img in enumerate(images):
             reply_text = f'Page {idx + 1}:\n{ocr_translate(img)}'
-            pdf_filename = f'translation_page_{idx + 1}.pdf'
-            send_pdf(update, context, reply_text, filename=pdf_filename)
+            lines = textwrap.wrap(reply_text, width=100)  # Adjust the width parameter to control the number of characters per line
+
+            x, y = 50, 500
+            for line in lines:
+                c.drawString(x, y, line)
+                y -= 15  # Adjust the value to control the vertical spacing between lines
+
+            if idx < len(images) - 1:  # Don't add a new page after the last image
+                c.showPage()
+
+        c.save()
+        buffer.seek(0)
+        context.bot.send_document(chat_id=update.effective_chat.id, document=buffer, filename="all_translated_pages.pdf")
     else:
         update.message.reply_text('Unsupported document type.')
+
 
 
 def main() -> None:
