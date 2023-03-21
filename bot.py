@@ -1,5 +1,4 @@
-TELEGRAM_API_KEY = consts.TOKEN
-OPENAI_API_KEY = consts.API_KEY
+#### Popad0s  ###
 
 import logging
 import io
@@ -17,6 +16,8 @@ from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from googletrans import Translator
 
+TELEGRAM_API_KEY = consts.TOKEN
+OPENAI_API_KEY = consts.API_KEY
 
 # Enable logging
 logging.basicConfig(
@@ -44,7 +45,15 @@ def send_pdf(update, context, text, filename="translation.pdf"):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=landscape(letter))
     c.setFont("Helvetica", 12)
-    c.drawString(50, 500, text)
+
+    max_width = 750
+    lines = textwrap.wrap(text, width=100)  # Adjust the width parameter to control the number of characters per line
+
+    x, y = 50, 500
+    for line in lines:
+        c.drawString(x, y, line)
+        y -= 15  # Adjust the value to control the vertical spacing between lines
+
     c.save()
     buffer.seek(0)
     context.bot.send_document(chat_id=update.effective_chat.id, document=buffer, filename=filename)
