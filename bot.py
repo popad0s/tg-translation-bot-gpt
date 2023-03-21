@@ -1,17 +1,22 @@
-import constants as consts
 TELEGRAM_API_KEY = consts.TOKEN
 OPENAI_API_KEY = consts.API_KEY
 
 import logging
-from telegram import ReplyKeyboardMarkup
 import io
 import requests
+import textwrap
+import constants as consts
+import pytesseract
+import constants as consts
+
+from PIL import Image
+from pdf2image import convert_from_bytes
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.pdfgen import canvas
 from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from googletrans import Translator
-import pytesseract
-from PIL import Image
-from pdf2image import convert_from_bytes
+
 
 # Enable logging
 logging.basicConfig(
@@ -35,19 +40,30 @@ def ocr_translate(img):
     translation = translator.translate(text).text
     return f'Translation from {lang}: {translation}'
 
+def send_pdf(update, context, text, filename="translation.pdf"):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=landscape(letter))
+    c.setFont("Helvetica", 12)
+    c.drawString(50, 500, text)
+    c.save()
+    buffer.seek(0)
+    context.bot.send_document(chat_id=update.effective_chat.id, document=buffer, filename=filename)
+
+
 def handle_text(update: Update, context: CallbackContext) -> None:
     text = update.message.text
     lang = translator.detect(text).lang
     translation = translator.translate(text).text
     reply_text = f'Translation from {lang}: {translation}'
-    update.message.reply_text(reply_text)
+    send_pdf(update, context, reply_text)
 
 def handle_image(update: Update, context: CallbackContext) -> None:
     image_url = update.message.photo[-1].get_file().file_path
     response = requests.get(image_url)
     img = Image.open(io.BytesIO(response.content))
     reply_text = ocr_translate(img)
-    update.message.reply_text(reply_text)
+    send_pdf(update, context, reply_text, filename="image_translation.pdf")
+
 
 def handle_document(update: Update, context: CallbackContext) -> None:
     document = update.message.document
@@ -58,9 +74,11 @@ def handle_document(update: Update, context: CallbackContext) -> None:
         images = convert_from_bytes(pdf_data.getvalue())
         for idx, img in enumerate(images):
             reply_text = f'Page {idx + 1}:\n{ocr_translate(img)}'
-            update.message.reply_text(reply_text)
+            pdf_filename = f'translation_page_{idx + 1}.pdf'
+            send_pdf(update, context, reply_text, filename=pdf_filename)
     else:
         update.message.reply_text('Unsupported document type.')
+
 
 def main() -> None:
     updater = Updater(TELEGRAM_API_KEY)
