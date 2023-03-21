@@ -1,3 +1,4 @@
 #poppler
 #tesseract
-#pdf2image
+
+this two MUST to be installed in the system to run bot locally on computer.
