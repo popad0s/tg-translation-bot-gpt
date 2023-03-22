@@ -6,9 +6,9 @@ This Telegram bot performs OCR (Optical Character Recognition) and translation o
 
 <div style="display: flex; flex-direction: column; margin-right: 10px">
   <div><a href="features">Features</a></div>
-  <div><a href="">Dependencies</a></div>
-  <div><a href="">Installation and Setup</a></div>
-  <div><a href="">Usage</a></div>
+  <div><a href="deps">Dependencies</a></div>
+  <div><a href="install">Installation and Setup</a></div>
+  <div><a href="usage">Usage</a></div>
  </div>
 <h3 id="features">Features</h3>
 
@@ -16,7 +16,7 @@ Translates text messages to English and sends the translation as a PDF.
 Extracts text from images using OCR, translates it to English, and sends the translation as a PDF.
 Extracts text from PDFs using OCR, translates it to English, and sends the translated pages as a single PDF.
 
-<h3>Dependencies</h3>
+<h3='deps'>Dependencies</h3>
 
 <ol>
   <li>pytesseract</li>
@@ -27,7 +27,7 @@ Extracts text from PDFs using OCR, translates it to English, and sends the trans
   <li>googletrans</li>
 </ol>
 
-<h3>Installation and Setup</h3>
+<h3='install'>Installation and Setup</h3>
 
 <div>
   <div>1. Clone the repository or download the code.</div>
@@ -42,7 +42,7 @@ Extracts text from PDFs using OCR, translates it to English, and sends the trans
     Run the script:
       python telegram_bot.py
   </div>
-<h3>Usage</h3>
+<h3 id='usage'>Usage</h3>
 
 <p>1. Search for the bot on Telegram using the bot's username.</p>
 <p>2. Initiate a conversation by clicking the "Start" button or typing /start in the chat. The bot will greet you with a message and prompt you to send an image, text, or PDF for translation.</p>
