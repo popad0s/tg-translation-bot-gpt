@@ -7,6 +7,7 @@ import pytesseract
 import constants as consts
 
 from PIL import Image
+from PyPDF4 import PdfFileReader, PdfFileWriter
 from pdf2image import convert_from_bytes
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
@@ -94,6 +95,10 @@ def handle_document(update: Update, context: CallbackContext) -> None:
         c = canvas.Canvas(buffer, pagesize=landscape(letter))
         c.setFont("Helvetica", 12)
 
+        # Read the original PDF
+        original_pdf = PdfFileReader(pdf_data)
+        output_pdf = PdfFileWriter()
+
         for idx, img in enumerate(images):
             reply_text = f'Page {idx + 1}:\n{ocr_translate(img)}'
             lines = textwrap.wrap(reply_text, width=100)
@@ -109,7 +114,23 @@ def handle_document(update: Update, context: CallbackContext) -> None:
 
         c.save()
         buffer.seek(0)
-        context.bot.send_document(chat_id=update.effective_chat.id, document=buffer, filename="all_translated_pages.pdf")
+
+        # Create the translated PDF
+        translated_pdf = PdfFileReader(buffer)
+
+        for i in range(translated_pdf.getNumPages()):
+            output_pdf.addPage(translated_pdf.getPage(i))
+
+        # Merge the original PDF and translated PDF
+        for i in range(original_pdf.getNumPages()):
+            output_pdf.addPage(original_pdf.getPage(i))
+        
+        # Save the merged PDF
+        merged_pdf_buffer = io.BytesIO()
+        output_pdf.write(merged_pdf_buffer)
+        merged_pdf_buffer.seek(0)
+
+        context.bot.send_document(chat_id=update.effective_chat.id, document=merged_pdf_buffer, filename="all_translated_pages.pdf")
     else:
         update.message.reply_text('Unsupported document type.')
 
