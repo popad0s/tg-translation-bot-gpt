@@ -5,10 +5,10 @@ This Telegram bot performs OCR (Optical Character Recognition) and translation o
 <h3>Table of Contents</h3>
 
 <div style="display: flex; flex-direction: column; margin-right: 10px">
-  <div><a href="features">Features</a></div>
-  <div><a href="deps">Dependencies</a></div>
-  <div><a href="install">Installation and Setup</a></div>
-  <div><a href="usage">Usage</a></div>
+  <div><a>Features</a></div>
+  <div><a>Dependencies</a></div>
+  <div><a>Installation and Setup</a></div>
+  <div><a>Usage</a></div>
  </div>
 <h3 id="features">Features</h3>
 
