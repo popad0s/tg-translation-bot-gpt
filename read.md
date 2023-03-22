@@ -16,7 +16,7 @@ Translates text messages to English and sends the translation as a PDF.
 Extracts text from images using OCR, translates it to English, and sends the translation as a PDF.
 Extracts text from PDFs using OCR, translates it to English, and sends the translated pages as a single PDF.
 
-<h3='deps'>Dependencies</h3>
+<h3 id='deps'>Dependencies</h3>
 
 <ol>
   <li>pytesseract</li>
