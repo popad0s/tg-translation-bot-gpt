@@ -4,7 +4,6 @@ import requests
 import textwrap
 import constants as consts
 import pytesseract
-import constants as consts
 
 from PIL import Image
 from PyPDF4 import PdfFileReader, PdfFileWriter
@@ -34,11 +33,21 @@ def start(update: Update, context: CallbackContext) -> None:
 def help(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('Send me an image, text, or PDF to translate it EN.')
 
+# def ocr_translate(img):
+#     text = pytesseract.image_to_string(img)
+#     lang = translator.detect(text).lang
+#     translation = translator.translate(text).text
+#     return f'Translation from {lang}: {translation}'
+
 def ocr_translate(img):
     text = pytesseract.image_to_string(img)
-    lang = translator.detect(text).lang
-    translation = translator.translate(text).text
-    return f'Translation from {lang}: {translation}'
+    try:
+        lang = translator.detect(text).lang
+        translation = translator.translate(text).text
+        return f'Translation from {lang}: {translation}'
+    except TypeError:
+        return "Error: Unable to detect language or translate text. Please try again."
+
 
 def add_watermark(c, watermark_text="Machine translation", x=70, y=70, font="Helvetica", font_size=50, opacity=0.1):
     c.saveState()

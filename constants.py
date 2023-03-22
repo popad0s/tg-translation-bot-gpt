@@ -1,2 +1,2 @@
-TOKEN = '^^^^'
-API_KEY = '^^^^^'
+TOKEN = '6055312619:AAE9i148PKhlddLTNfd1EDvJ-PfuPLlaqZ0'
+API_KEY = ''
