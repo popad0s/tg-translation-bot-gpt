@@ -27,7 +27,7 @@ Extracts text from PDFs using OCR, translates it to English, and sends the trans
   <li>googletrans</li>
 </ol>
 
-<h3='install'>Installation and Setup</h3>
+<h3 id='install'>Installation and Setup</h3>
 
 <div>
   <div>1. Clone the repository or download the code.</div>
