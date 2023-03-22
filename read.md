@@ -49,8 +49,9 @@ Extracts text from PDFs using OCR, translates it to English, and sends the trans
 <p>3. To get help or instructions at any time, type /help in the chat. The bot will provide a brief description of its capabilities.
 <p>4. Send text directly to the bot by typing a message in the chat. The bot will detect the language, translate it to English, and send the translated text back as a PDF.</p>
 <p>5. Send an image containing text to the bot. The bot will perform OCR on the image, detect the language, translate the text to English, and send the translated text as a PDF.</p>
-<p>6. Send a PDF document containing text to the bot. The bot will convert the PDF to images, perform OCR on each page, detect the language, translate the text to English, and send the translated pages as a single PDF.
-Remember that the bot is designed to translate text into English. If you wish to support additional languages, you will need to modify the script accordingly.</p>
+<p>6. Send a PDF document containing text to the bot. The bot will convert the PDF to images, perform OCR on each page, detect the language, translate the text to English, and send the translated pages as a single PDF.</p>
+
+  Remember that the bot is designed to translate text into English. If you wish to support additional languages, you will need to modify the script accordingly.
 
 By following these steps, users can leverage the Telegram bot to translate text, images, or PDFs to English with ease. The bot provides a convenient and accessible way to perform translations on various types of media.
 
