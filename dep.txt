@@ -1,0 +1,12 @@
+python-telegram-bot==13.7
+googletrans==4.0.0-rc1
+Pillow==8.4.0
+pytesseract==0.3.8
+pdf2image==1.16.0
+reportlab==3.6.1
+
+
+#poppler
+#tesseract
+
+this two MUST to be installed in the system to run bot locally on computer.

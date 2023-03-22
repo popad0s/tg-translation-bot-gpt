@@ -1,4 +1,8 @@
-#poppler
-#tesseract
+# My Telegram Translation Bot
 
-this two MUST to be installed in the system to run bot locally on computer.
+This is a Telegram bot that can translate text, images, and PDF files.
+
+## Installation
+
+Clone this repository and navigate to the project folder:
+

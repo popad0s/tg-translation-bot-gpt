@@ -1,5 +1,3 @@
-#### Popad0s  ###
-
 import logging
 import io
 import requests
