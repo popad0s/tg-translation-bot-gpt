@@ -39,19 +39,29 @@ def ocr_translate(img):
     translation = translator.translate(text).text
     return f'Translation from {lang}: {translation}'
 
+def add_watermark(c, watermark_text="Machine translation", x=70, y=70, font="Helvetica", font_size=50, opacity=0.1):
+    c.saveState()
+    c.setFillColorRGB(0, 0, 0, alpha=opacity)
+    c.setFont(font, font_size)
+    c.rotate(30)  # Adjust the angle of the watermark
+    c.drawString(x, y, watermark_text)
+    c.restoreState()
+
+
 def send_pdf(update, context, text, filename="translation.pdf"):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=landscape(letter))
     c.setFont("Helvetica", 12)
 
     max_width = 750
-    lines = textwrap.wrap(text, width=100)  # Adjust the width parameter to control the number of characters per line
+    lines = textwrap.wrap(text, width=100)
 
     x, y = 50, 500
     for line in lines:
         c.drawString(x, y, line)
-        y -= 15  # Adjust the value to control the vertical spacing between lines
+        y -= 15
 
+    add_watermark(c)  # Add the watermark before saving
     c.save()
     buffer.seek(0)
     context.bot.send_document(chat_id=update.effective_chat.id, document=buffer, filename=filename)
@@ -86,14 +96,15 @@ def handle_document(update: Update, context: CallbackContext) -> None:
 
         for idx, img in enumerate(images):
             reply_text = f'Page {idx + 1}:\n{ocr_translate(img)}'
-            lines = textwrap.wrap(reply_text, width=100)  # Adjust the width parameter to control the number of characters per line
+            lines = textwrap.wrap(reply_text, width=100)
 
             x, y = 50, 500
             for line in lines:
                 c.drawString(x, y, line)
-                y -= 15  # Adjust the value to control the vertical spacing between lines
+                y -= 15
 
-            if idx < len(images) - 1:  # Don't add a new page after the last image
+            add_watermark(c)  # Add the watermark before showing the next page or saving
+            if idx < len(images) - 1:
                 c.showPage()
 
         c.save()
