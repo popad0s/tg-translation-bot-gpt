@@ -7,6 +7,7 @@ import pytesseract
 import googletrans
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #  
+
 from PIL import Image
 from PyPDF4 import PdfFileReader, PdfFileWriter
 from pdf2image import convert_from_bytes
@@ -38,16 +39,23 @@ pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'  # Replac
 
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(
-        'Hi! Send me an image, text, or PDF and then choose a language to translate it to.',
-        reply_markup=language_keyboard(),
+        "Hi! Send me an image, text, or PDF and i will translate it to EN.\n"
+        "Here are some hints to help you use this bot:\n\n"
+        "1. Choose a target language: Use the /menu_language command to select the language you want to translate to.\n"
+        "2. OCR text:Type '/ocr_file', send an image or PDF containing text, and the bot will recognize the text and translate it to the chosen language.\n\n"
+        "Send me an image, text, or PDF to translate it to your chosen language."
+        "3. Type '/menu_output_format' to choose a format of answer from bot (text of pdf file)\n"
+        "4. Type '/help' to show all commands"
+        # reply_markup=language_keyboard(),
     )
 
 def help(update: Update, context: CallbackContext) -> None:
     help_text = (
         "Here are some hints to help you use this bot:\n\n"
         "1. Choose a target language: Use the /menu_language command to select the language you want to translate to.\n"
-        "2. OCR text: Send an image or PDF containing text, and the bot will recognize the text and translate it to the chosen language.\n\n"
+        "2. OCR text:Type '/ocr_file', send an image or PDF containing text, and the bot will recognize the text and translate it to the chosen language.\n\n"
         "Send me an image, text, or PDF to translate it to your chosen language."
+        "3. Type '/menu_output_format' to choose a format of answer from bot (text of pdf file)"
     )
     update.message.reply_text(help_text)
 
@@ -171,8 +179,11 @@ def handle_text(update: Update, context: CallbackContext) -> None:
     lang = translator.detect(text).lang
     translation = translator.translate(text, dest=target_language).text
 
-    reply_text = f'Translation from {lang}: {translation}'
+    page_number = context.user_data.get("page_number", 1)
+    reply_text = f'Translation from {lang} to {target_language}, Page {page_number}: {translation}'
     send_translation(update, context, reply_text)
+    context.user_data["page_number"] = page_number + 1
+
 
 def handle_image(update: Update, context: CallbackContext) -> None:
     image_url = update.message.photo[-1].get_file().file_path
@@ -196,12 +207,41 @@ def handle_document(update: Update, context: CallbackContext) -> None:
         for idx, img in enumerate(images):
             target_language = context.user_data.get("target_language", "en")
             translation_text = ocr_translate(img, target_language)
-            translations.append(f'Page {idx + 1}:\n{translation_text}')
+            translations.append(translation_text)
 
-        reply_text = "\n\n".join(translations)
-        send_translation(update, context, reply_text, filename="all_translated_pages.pdf")
+        send_merged_pdf(update, context, translations, filename="all_translated_pages.pdf")
     else:
         update.message.reply_text('Unsupported document type.')
+
+def send_merged_pdf(update, context, texts, filename="translation.pdf"):
+    buffer = io.BytesIO()
+    pdf_writer = PdfFileWriter()
+
+    for text in texts:
+        page_buffer = io.BytesIO()
+        c = canvas.Canvas(page_buffer, pagesize=landscape(letter))
+        c.setFont("FreeSans", 12)
+
+        max_width = 750
+        lines = textwrap.wrap(text, width=100)
+
+        x, y = 50, 500
+        for line in lines:
+            c.drawString(x, y, line)
+            y -= 15
+
+        add_watermark(c)
+        c.showPage()
+        c.save()
+        page_buffer.seek(0)
+
+        page_pdf = PdfFileReader(page_buffer)
+        pdf_writer.addPage(page_pdf.getPage(0))
+
+    with buffer:
+        pdf_writer.write(buffer)
+        buffer.seek(0)
+        context.bot.send_document(chat_id=update.effective_chat.id, document=buffer, filename=filename)
 
 def menu_output_format(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Choose an output format:", reply_markup=format_keyboard())
