@@ -16,7 +16,7 @@ from reportlab.pdfgen import canvas
 from telegram import ReplyKeyboardMarkup
 from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from googletrans import Translator
+from googletrans import Translator, LANGUAGES
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
 from reportlab.pdfbase import pdfmetrics
