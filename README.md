@@ -25,6 +25,7 @@ Extracts text from PDFs using OCR, translates it to English, and sends the trans
   <li>reportlab</li>
   <li>python-telegram-bot</li>
   <li>googletrans</li>
+  <li>ghostscript</li>
 </ol>
 
 <h3 id='install'>Installation and Setup</h3>
