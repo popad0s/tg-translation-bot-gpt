@@ -9,18 +9,20 @@ import googletrans
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #  
 
 from PIL import Image
-from PyPDF4 import PdfFileReader, PdfFileWriter
-from pdf2image import convert_from_bytes
+from PyPDF2 import PdfReader
+from pdf2image import convert_from_path
 from pdfrw import PdfReader, PdfWriter, IndirectPdfDict
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from telegram import ReplyKeyboardMarkup
+from PyPDF4 import PdfFileReader, PdfFileWriter
 from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from googletrans import Translator, LANGUAGES
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
 from reportlab.pdfbase import pdfmetrics
+from PIL import ImageDraw, ImageFont
 from reportlab.pdfbase.ttfonts import TTFont
 
 TELEGRAM_API_KEY = consts.TOKEN
@@ -220,27 +222,57 @@ def handle_image(update: Update, context: CallbackContext) -> None:
 
     send_translation(update, context, reply_text, filename="image_translation.pdf")
 
+from PyPDF2 import PdfReader
+from pdf2image import convert_from_path
+
 def handle_document(update: Update, context: CallbackContext) -> None:
     document = update.message.document
     if document.file_name.lower().endswith('.pdf'):
         file = context.bot.get_file(update.message.document.file_id)
         pdf_data = io.BytesIO()
         file.download(out=pdf_data)
-        images = convert_from_bytes(pdf_data.getvalue())
-
+        
+        # Save the PDF to a temporary file
+        with open("temp.pdf", "wb") as f:
+            f.write(pdf_data.getvalue())
+        
+        # Get the number of pages in the PDF
+        pdf_reader = PdfReader("temp.pdf")
+        num_pages = len(pdf_reader.pages)
+        
+        # Convert the PDF pages to images
+        images = convert_from_path("temp.pdf")
+        
+        # Perform OCR and translation on each image
         translations = []
-
-        for idx, img in enumerate(images):
+        for img in images:
             target_language = context.user_data.get("target_language", "en")
             translation_text = ocr_translate(img, target_language)
             translations.append(translation_text)
+        
+        # Create a new PDF with the translations
+        pdf_writer = PdfFileWriter()
+        for i, img in enumerate(images):
+            # Overlay the translation on the image
+            draw = ImageDraw.Draw(img)
+            font = ImageFont.truetype("FreeSans.ttf", 16)
+            draw.multiline_text((50, 50), translations[i], fill=(0, 0, 0), font=font)
 
-        # Overlay the translations on the original PDF
-        pdf_data.seek(0)
-        send_overlayed_pdf(update, context, pdf_data, translations, filename="overlayed_translation.pdf")
+            # Convert the image back to a PDF page
+            img_buffer = io.BytesIO()
+            img.save(img_buffer, format="PDF")
+            img_buffer.seek(0)
+            img_pdf = PdfFileReader(img_buffer)
+            pdf_writer.addPage(img_pdf.getPage(0))
+
+        # Send the new PDF with the translations
+        buffer = io.BytesIO()
+        pdf_writer.write(buffer)
+        buffer.seek(0)
+        context.bot.send_document(chat_id=update.effective_chat.id, document=buffer, filename="translated.pdf")
     else:
         update.message.reply_text('Unsupported document type.')
-        
+  
 def send_merged_pdf(update, context, texts, filename="translation.pdf"):
     buffer = io.BytesIO()
     pdf_writer = PdfFileWriter()
