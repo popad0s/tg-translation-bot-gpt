@@ -1,2 +1,2 @@
-TOKEN = '6224477265:AAGt9hpIFibKDdxo6BntKnkaQyZe8kgktJE'
+TOKEN = ''
 API_KEY = ''
